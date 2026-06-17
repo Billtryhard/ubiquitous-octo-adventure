@@ -1,0 +1,7 @@
+# Layer 1 (data & valuation) runs entirely on the Python 3.10+ standard
+# library — no third-party runtime dependencies. Black-Scholes greeks use
+# math.erf, market data is persisted with the built-in sqlite3 module, and the
+# default feed is a self-contained synthetic provider.
+#
+# Development only:
+pytest>=7.0
