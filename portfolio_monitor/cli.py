@@ -7,9 +7,11 @@ import sys
 from datetime import date, datetime
 
 from .analytics import AnalyticsConfig, compute_analytics, store_analytics
+from .macro import MacroWeights, SyntheticMacroProvider, compute_macro_score, store_macro
+from .news import YFinanceHeadlineProvider, compute_news
 from .positions import load_positions
 from .providers import SyntheticProvider
-from .report import render, render_analytics
+from .report import render, render_analytics, render_market_context
 from .runner import run_monitor
 from .sectors import SectorLookup
 from .storage import Storage
@@ -50,7 +52,33 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--iv-rich", type=float, default=78.0, help="IV rank above this is 'rich' (default 78)")
     p.add_argument("--iv-cheap", type=float, default=38.0, help="IV rank below this is 'cheap' (default 38)")
     p.add_argument("--dte-warn", type=int, default=45, help="DTE at/under this surfaces time decay (default 45)")
+
+    # Market context (Layer 3)
+    p.add_argument("--no-macro", action="store_true", help="skip the deterministic macro gate")
+    p.add_argument("--no-news", action="store_true", help="skip the Claude news analysis")
+    p.add_argument("--news-window", type=int, default=3, help="headline lookback in days (default 3)")
+    p.add_argument("--live-news", action="store_true",
+                   help="pull live headlines via yfinance instead of the synthetic provider")
+    p.add_argument("--no-news-cache", action="store_true",
+                   help="ignore the per-day news cache (will re-bill the API)")
+    p.add_argument("--macro-weights", default=None,
+                   help="comma-separated weights vix_level,vix_percentile,term_structure,"
+                        "breadth,credit (must sum to 1.0)")
     return p
+
+
+def _parse_macro_weights(spec):
+    if not spec:
+        return MacroWeights()
+    parts = [float(x) for x in spec.split(",")]
+    if len(parts) != 5:
+        raise argparse.ArgumentTypeError(
+            "--macro-weights needs 5 comma-separated values: "
+            "vix_level,vix_percentile,term_structure,breadth,credit"
+        )
+    w = MacroWeights(*parts)
+    w.validate()
+    return w
 
 
 def main(argv=None) -> int:
@@ -87,6 +115,27 @@ def main(argv=None) -> int:
             )
             store_analytics(storage, analytics)
             print(render_analytics(analytics))
+
+        # Market context (Layer 3): macro gate + Claude news analysis
+        macro_result = None
+        if not args.no_macro:
+            weights = _parse_macro_weights(args.macro_weights)
+            inputs = SyntheticMacroProvider().get_macro_inputs(args.asof)
+            macro_result = compute_macro_score(inputs, weights)
+            store_macro(storage, macro_result)
+
+        news_results = []
+        if not args.no_news:
+            headline_provider = YFinanceHeadlineProvider() if args.live_news else None
+            news_results = compute_news(
+                positions, args.asof, storage,
+                headline_provider=headline_provider,
+                window_days=args.news_window,
+                use_cache=not args.no_news_cache,
+            )
+
+        if macro_result is not None or news_results:
+            print(render_market_context(macro_result, news_results))
     finally:
         storage.close()
     return 0

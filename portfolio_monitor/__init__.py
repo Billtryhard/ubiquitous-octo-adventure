@@ -26,6 +26,24 @@ from .models import (
     PositionValuation,
     SHARES_PER_CONTRACT,
 )
+from .macro import (
+    MacroInputs,
+    MacroProvider,
+    MacroResult,
+    MacroWeights,
+    SyntheticMacroProvider,
+    compute_macro_score,
+    store_macro,
+)
+from .news import (
+    ClaudeNewsAnalyzer,
+    Headline,
+    HeadlineProvider,
+    NewsAnalysis,
+    SyntheticHeadlineProvider,
+    YFinanceHeadlineProvider,
+    compute_news,
+)
 from .positions import load_positions, parse_position
 from .sectors import SectorLookup
 from .providers import FinanceProvider, SyntheticProvider
@@ -63,4 +81,18 @@ __all__ = [
     "compute_analytics",
     "store_analytics",
     "SectorLookup",
+    "MacroInputs",
+    "MacroProvider",
+    "MacroResult",
+    "MacroWeights",
+    "SyntheticMacroProvider",
+    "compute_macro_score",
+    "store_macro",
+    "ClaudeNewsAnalyzer",
+    "Headline",
+    "HeadlineProvider",
+    "NewsAnalysis",
+    "SyntheticHeadlineProvider",
+    "YFinanceHeadlineProvider",
+    "compute_news",
 ]

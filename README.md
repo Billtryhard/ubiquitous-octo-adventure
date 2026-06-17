@@ -9,6 +9,9 @@ An options + equity portfolio monitor.
 * **Layer 2 — Analytics**: allocation & concentration, aggregate
   portfolio-level greeks, and per-option IV environment (IV rank/percentile,
   rich/cheap, near-expiry) built on the stored snapshots.
+* **Layer 3 — Market context**: a deterministic 0-100 macro gate and a daily
+  Claude news analysis per held name (summary, sentiment, drivers, position
+  flags — informational, never a trade signal).
 
 Pure Python standard library — **no third-party runtime dependencies**
 (`pytest` is used only for tests).
@@ -136,6 +139,65 @@ with Storage("portfolio.db") as st:
 > `--asof`) to accumulate the snapshots that IV rank/percentile are computed
 > from.
 
+## Layer 3 — Market context
+
+Runs after analytics. Two independent parts; both persist to the same SQLite
+database (`macro_score`, `news_analysis`). Everything is **context, not a
+trade signal**.
+
+### Macro gate (deterministic, 0-100)
+
+A pure, reproducible read on the environment the book sits in — same inputs in,
+same score out. Higher = calmer / more risk-supportive. Five sub-scores
+(each 0-100) blended with configurable weights that must sum to 1.0:
+
+| Sub-score | Driver | Higher score when… |
+|-----------|--------|--------------------|
+| `vix_level` | VIX | VIX is low |
+| `vix_percentile` | VIX vs its trailing 1-year range | VIX is low in its own range |
+| `term_structure` | VIX vs VIX3M | contango (VIX3M > VIX) |
+| `breadth` | % of SPY constituents above their 200-day MA (proxy) | breadth healthy |
+| `credit` | HYG vs TLT (1-year percentile) | credit risk-on / spreads tight |
+
+Inputs come from a `MacroProvider`; the default `SyntheticMacroProvider`
+derives a full 1-year history deterministically from the run date (so the
+percentile sub-scores are meaningful and the gate is reproducible offline). A
+live provider would pull `^VIX` / `^VIX3M` / `HYG` / `TLT` and a breadth series.
+
+```bash
+python3 -m portfolio_monitor --asof 2026-06-17 \
+    --macro-weights 0.25,0.25,0.2,0.15,0.15   # vix_level,vix_percentile,term_structure,breadth,credit
+```
+
+### News analysis (Claude via API, per held name)
+
+For each underlying, recent headlines (default 3-day window) are sent to Claude
+(`claude-opus-4-8`, via the official `anthropic` SDK, structured output). Per
+name it returns: a short factual **summary** of what happened, a **sentiment**
+read (positive / neutral / negative), the **key drivers**, and a **position
+flag** for anything that specifically affects a held position (e.g. earnings
+dated before an option's expiry). **Claude summarizes and flags — it does not
+say buy, sell, hold, or roll.**
+
+* **Caching** — each name's analysis is cached per day (`news_analysis` table),
+  so re-running a day never re-bills the API. This is the only paid part of the
+  system; per-call cost is small and surfaced as an estimate.
+* **Graceful degradation** — if the `anthropic` SDK isn't installed or
+  `ANTHROPIC_API_KEY` is unset, names are returned with status `skipped` (with a
+  reason) instead of crashing, so the rest of the monitor still runs offline.
+  Skips are never cached, so a later run with a key fills them in.
+* **Headlines** — default `SyntheticHeadlineProvider` (deterministic, offline);
+  pass `--live-news` to pull live headlines via yfinance.
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+python3 -m portfolio_monitor --asof 2026-06-17 --live-news --news-window 3
+# offline / no key: news is skipped with a clear note; macro gate still runs
+python3 -m portfolio_monitor --asof 2026-06-17 --no-news
+```
+
+Optional Layer 3 dependencies: `pip install anthropic yfinance`.
+
 ## Data feed
 
 The data layer talks to the feed through the `FinanceProvider` interface
@@ -183,7 +245,9 @@ with Storage("portfolio.db") as st:
 | `runner.py` | `run_monitor` orchestration, `RunResult` |
 | `sectors.py` | ticker→sector lookup (config + yfinance fallback) |
 | `analytics.py` | allocation, aggregate greeks, IV environment + persistence |
-| `report.py` | terminal rendering (valuation + analytics) |
+| `macro.py` | deterministic macro gate (providers, scoring, persistence) |
+| `news.py` | Claude news analysis (headlines, analyzer, caching, persistence) |
+| `report.py` | terminal rendering (valuation + analytics + market context) |
 | `cli.py` | argument parsing / entry point |
 
 ## Tests

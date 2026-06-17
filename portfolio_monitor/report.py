@@ -5,7 +5,9 @@ from __future__ import annotations
 from typing import List
 
 from .analytics import AnalyticsResult
+from .macro import MacroResult
 from .models import PositionValuation
+from .news import NewsAnalysis
 from .runner import RunResult
 
 
@@ -139,4 +141,55 @@ def render_analytics(a: AnalyticsResult) -> str:
                 f"  IV rank 'building history' (< {cfg.iv_min_history_days} days stored): "
                 f"{', '.join(building)}"
             )
+    return "\n".join(lines)
+
+
+def render_market_context(macro, news) -> str:
+    """Render the macro gate and per-name Claude news analysis.
+
+    ``macro`` is a MacroResult (or None); ``news`` is a list[NewsAnalysis].
+    """
+    lines: List[str] = []
+    lines.append("")
+    lines.append("Market context")
+    lines.append("=" * 70)
+
+    if macro is not None:
+        lines.append(
+            f"Macro gate: {macro.score:.0f}/100 — {macro.label}  "
+            f"(higher = calmer / more supportive)"
+        )
+        order = ["vix_level", "vix_percentile", "term_structure", "breadth", "credit"]
+        for k in order:
+            w = macro.weights.get(k, 0.0)
+            lines.append(f"  {k:<16}{macro.components[k]:>6.0f}/100   (weight {w:.2f})")
+        i = macro.inputs
+        lines.append(
+            f"  drivers: VIX {i.get('vix'):.1f} (1y pctile {i.get('vix_1y_percentile'):.0f}), "
+            f"VIX3M {i.get('vix3m'):.1f}, breadth {i.get('breadth_pct'):.0f}%, "
+            f"HYG/TLT {i.get('hyg_tlt_ratio'):.3f}"
+        )
+
+    if news:
+        lines.append("")
+        lines.append("News analysis (Claude — summary & flags only, not a trade signal):")
+        total_cost = 0.0
+        for a in news:
+            lines.append(f"  {a.ticker}:")
+            if a.status == "ok":
+                lines.append(f"    sentiment: {a.sentiment}  ({a.headline_count} headlines)")
+                if a.summary:
+                    lines.append(f"    summary: {a.summary}")
+                if a.key_drivers:
+                    lines.append(f"    drivers: {', '.join(a.key_drivers)}")
+                if a.position_flag:
+                    lines.append(f"    ⚑ position: {a.position_flag}")
+                if a.est_cost_usd is not None:
+                    total_cost += a.est_cost_usd
+            elif a.status == "no_headlines":
+                lines.append("    no headlines in window")
+            else:  # skipped
+                lines.append(f"    skipped ({a.reason})")
+        if total_cost:
+            lines.append(f"  est. API cost this run: ${total_cost:.4f}")
     return "\n".join(lines)

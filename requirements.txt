@@ -1,7 +1,17 @@
-# Layer 1 (data & valuation) runs entirely on the Python 3.10+ standard
-# library — no third-party runtime dependencies. Black-Scholes greeks use
-# math.erf, market data is persisted with the built-in sqlite3 module, and the
-# default feed is a self-contained synthetic provider.
+# Layers 1 & 2 (data, valuation, analytics) run entirely on the Python 3.10+
+# standard library — no third-party runtime dependencies. Black-Scholes greeks
+# use math.erf, market data is persisted with the built-in sqlite3 module, and
+# the default feeds are self-contained synthetic providers.
+#
+# Layer 3 (market context) is the only part that can reach external services,
+# and both dependencies are OPTIONAL — without them the macro gate still runs
+# (it is deterministic) and the Claude news analysis degrades gracefully:
+#
+#   anthropic   # Claude news analysis (the only paid part); needs ANTHROPIC_API_KEY
+#   yfinance    # live headlines (--live-news) and sector fallback
+#
+# Install the optional Layer 3 extras with:
+#   pip install anthropic yfinance
 #
 # Development only:
 pytest>=7.0
