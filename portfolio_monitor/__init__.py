@@ -9,6 +9,15 @@ The default feed is a deterministic synthetic provider so the monitor runs
 fully offline; swap in a real :class:`FinanceProvider` for live data.
 """
 
+from .analytics import (
+    AggregateGreeks,
+    Allocation,
+    AnalyticsConfig,
+    AnalyticsResult,
+    IVEnvironment,
+    compute_analytics,
+    store_analytics,
+)
 from .models import (
     Chain,
     Greeks,
@@ -18,6 +27,7 @@ from .models import (
     SHARES_PER_CONTRACT,
 )
 from .positions import load_positions, parse_position
+from .sectors import SectorLookup
 from .providers import FinanceProvider, SyntheticProvider
 from .runner import RunResult, run_from_file, run_monitor
 from .snapshots import write_chain_snapshot, load_chain_snapshot
@@ -45,4 +55,12 @@ __all__ = [
     "value_option_position",
     "value_share_position",
     "blackscholes",
+    "AggregateGreeks",
+    "Allocation",
+    "AnalyticsConfig",
+    "AnalyticsResult",
+    "IVEnvironment",
+    "compute_analytics",
+    "store_analytics",
+    "SectorLookup",
 ]

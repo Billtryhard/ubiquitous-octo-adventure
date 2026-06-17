@@ -1,9 +1,14 @@
-# Portfolio Monitor — Layer 1: Data & Valuation
+# Portfolio Monitor
 
-The data and valuation foundation for an options + equity portfolio monitor.
-It loads a mixed book of option and share positions, pulls marks, computes
-Black-Scholes greeks locally, snapshots the full option chain per underlying
-(JSON + SQLite) for later diffing, and reports per-position valuation.
+An options + equity portfolio monitor.
+
+* **Layer 1 — Data & Valuation**: loads a mixed book of option and share
+  positions, pulls marks, computes Black-Scholes greeks locally, snapshots the
+  full option chain per underlying (JSON + SQLite) for later diffing, and
+  reports per-position valuation.
+* **Layer 2 — Analytics**: allocation & concentration, aggregate
+  portfolio-level greeks, and per-option IV environment (IV rank/percentile,
+  rich/cheap, near-expiry) built on the stored snapshots.
 
 Pure Python standard library — **no third-party runtime dependencies**
 (`pytest` is used only for tests).
@@ -85,6 +90,52 @@ way, can exceed 100% on overshoot).
 Everything is stored in a single SQLite database: `positions`,
 `underlying_snapshots`, `chain_snapshots`, `valuations`.
 
+## Layer 2 — Analytics
+
+Runs automatically after valuation (disable with `--no-analytics`) and is
+persisted to the same SQLite database (`analytics_allocation`,
+`analytics_greeks`, `analytics_iv`). Everything is **informational** — it
+surfaces facts, it does not advise.
+
+**Allocation & concentration** — percent of total value by ticker and by
+sector. Sectors resolve via `sectors.json` (config), then an optional yfinance
+fallback, then `Unknown`. Flags any ticker over `--ticker-cap` (default 40%) or
+sector over `--sector-cap` (default 60%).
+
+**Aggregate greeks** (portfolio-level exposures):
+* **Net delta** in share-equivalent terms (options: `delta × 100 × contracts`;
+  shares contribute 1 each).
+* **Total daily theta** in dollars — what the book loses per day if nothing
+  moves.
+* **Net vega** in dollars per 1 IV point.
+
+**IV environment** (per option) — current IV plus an **IV rank** and **IV
+percentile** computed from stored daily snapshots over `--iv-lookback` (default
+252 days). Until `--iv-min-history` days exist (default 20) it shows
+*building history*. Flags **rich** (IV rank > `--iv-rich`, default 78) or
+**cheap** (< `--iv-cheap`, default 38), and marks contracts within
+`--dte-warn` days of expiry (default 45) so upcoming time-decay / roll
+decisions are visible.
+
+```bash
+python3 -m portfolio_monitor --asof 2026-06-17 \
+    --sectors sectors.json --ticker-cap 40 --sector-cap 60 \
+    --iv-lookback 252 --iv-min-history 20 --iv-rich 78 --iv-cheap 38 --dte-warn 45
+```
+
+```python
+from portfolio_monitor import compute_analytics, store_analytics, Storage, SectorLookup, run_monitor
+
+with Storage("portfolio.db") as st:
+    result = run_monitor(positions, asof, storage=st)
+    analytics = compute_analytics(positions, result.valuations, st, asof, sectors=SectorLookup())
+    store_analytics(st, analytics)
+```
+
+> IV rank needs history. Run the monitor once per trading day (advancing
+> `--asof`) to accumulate the snapshots that IV rank/percentile are computed
+> from.
+
 ## Data feed
 
 The data layer talks to the feed through the `FinanceProvider` interface
@@ -130,7 +181,9 @@ with Storage("portfolio.db") as st:
 | `snapshots.py` | dated JSON chain files |
 | `storage.py` | single-file SQLite schema + read helpers |
 | `runner.py` | `run_monitor` orchestration, `RunResult` |
-| `report.py` | terminal rendering |
+| `sectors.py` | ticker→sector lookup (config + yfinance fallback) |
+| `analytics.py` | allocation, aggregate greeks, IV environment + persistence |
+| `report.py` | terminal rendering (valuation + analytics) |
 | `cli.py` | argument parsing / entry point |
 
 ## Tests
