@@ -46,6 +46,7 @@ from .news import (
 )
 from .positions import load_positions, parse_position
 from .sectors import SectorLookup
+from .webull_feed import WebullProvider, webull_available
 from .providers import FinanceProvider, SyntheticProvider
 from .runner import RunResult, run_from_file, run_monitor
 from .snapshots import write_chain_snapshot, load_chain_snapshot
@@ -95,4 +96,6 @@ __all__ = [
     "SyntheticHeadlineProvider",
     "YFinanceHeadlineProvider",
     "compute_news",
+    "WebullProvider",
+    "webull_available",
 ]

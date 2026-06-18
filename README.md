@@ -213,6 +213,29 @@ To use a live feed (yfinance, a broker API, or the bundled finance MCP server),
 implement `get_spot` and `get_chain` on a `FinanceProvider` subclass and pass
 the instance to `run_monitor(...)`.
 
+### Webull (live quotes & option chains)
+
+A `WebullProvider` is included that pulls live spot prices and full option
+chains (bid/ask/last/IV/volume/OI) via the **unofficial** `webull` PyPI
+package:
+
+```bash
+pip install webull
+export WEBULL_EMAIL=you@example.com WEBULL_PASSWORD=...   # + WEBULL_MFA / WEBULL_TRADE_PIN if required
+python3 -m portfolio_monitor --asof 2026-06-17 --feed webull
+python3 -m portfolio_monitor --asof 2026-06-17 --feed webull --feed-fallback   # synthetic if login fails
+python3 -m portfolio_monitor --asof 2026-06-17 --feed webull --webull-max-expiries 6
+```
+
+> ⚠️ The `webull` package is **unofficial / reverse-engineered**: it logs in
+> with your email + password (plus MFA / trade PIN), can break without notice,
+> and using it may conflict with Webull's Terms of Service. `WebullProvider` is
+> **read-only** — it pulls marks and chains, it never places orders. Login can
+> be interactive (MFA); for unattended runs, authenticate once and pass the
+> client into `WebullProvider(client)` directly. Option IV comes from Webull's
+> feed; if a field is missing, greeks fall back to the local Black-Scholes
+> solver. Keep `--feed synthetic` (the default) for fully offline runs.
+
 ## Importable API (for later layers)
 
 ```python
@@ -245,6 +268,7 @@ with Storage("portfolio.db") as st:
 | `runner.py` | `run_monitor` orchestration, `RunResult` |
 | `sectors.py` | ticker→sector lookup (config + yfinance fallback) |
 | `analytics.py` | allocation, aggregate greeks, IV environment + persistence |
+| `webull_feed.py` | live quotes & option chains via the unofficial `webull` package |
 | `macro.py` | deterministic macro gate (providers, scoring, persistence) |
 | `news.py` | Claude news analysis (headlines, analyzer, caching, persistence) |
 | `report.py` | terminal rendering (valuation + analytics + market context) |

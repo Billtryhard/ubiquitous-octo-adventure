@@ -42,6 +42,14 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--rate", type=float, default=0.045, help="annual risk-free rate (default 0.045)")
     p.add_argument("--no-snapshots", action="store_true", help="skip writing dated JSON files")
 
+    # Market data feed
+    p.add_argument("--feed", choices=["synthetic", "webull"], default="synthetic",
+                   help="market data feed for quotes & option chains (default synthetic)")
+    p.add_argument("--webull-max-expiries", type=int, default=None,
+                   help="cap expirations pulled per underlying from Webull (default: all)")
+    p.add_argument("--feed-fallback", action="store_true",
+                   help="fall back to the synthetic feed if the live feed can't connect")
+
     # Analytics (Layer 2)
     p.add_argument("--no-analytics", action="store_true", help="skip the analytics summary")
     p.add_argument("--sectors", default="sectors.json", help="ticker->sector config JSON")
@@ -81,9 +89,30 @@ def _parse_macro_weights(spec):
     return w
 
 
+def _build_feed(args):
+    """Select the market data feed, with optional synthetic fallback."""
+    if args.feed == "synthetic":
+        return SyntheticProvider(rate=args.rate)
+
+    if args.feed == "webull":
+        from .webull_feed import WebullProvider
+        try:
+            return WebullProvider.from_env(max_expiries=args.webull_max_expiries)
+        except Exception as exc:
+            msg = f"webull feed unavailable: {exc}"
+            if args.feed_fallback:
+                print(f"{msg} — falling back to synthetic feed", file=sys.stderr)
+                return SyntheticProvider(rate=args.rate)
+            raise SystemExit(
+                f"{msg}\nSet WEBULL_EMAIL / WEBULL_PASSWORD (and WEBULL_MFA / "
+                f"WEBULL_TRADE_PIN if required), or pass --feed-fallback."
+            )
+    raise SystemExit(f"unknown feed {args.feed!r}")
+
+
 def main(argv=None) -> int:
     args = build_parser().parse_args(argv)
-    provider = SyntheticProvider(rate=args.rate)
+    provider = _build_feed(args)
     positions = load_positions(args.positions)
 
     storage = Storage(args.db)

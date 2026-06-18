@@ -9,9 +9,10 @@
 #
 #   anthropic   # Claude news analysis (the only paid part); needs ANTHROPIC_API_KEY
 #   yfinance    # live headlines (--live-news) and sector fallback
+#   webull      # live quotes & option chains (--feed webull); UNOFFICIAL package
 #
-# Install the optional Layer 3 extras with:
-#   pip install anthropic yfinance
+# Install the optional extras with:
+#   pip install anthropic yfinance webull
 #
 # Development only:
 pytest>=7.0
