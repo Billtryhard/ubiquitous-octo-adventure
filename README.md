@@ -227,6 +227,22 @@ python3 -m portfolio_monitor --asof 2026-06-17 --feed webull --feed-fallback   #
 python3 -m portfolio_monitor --asof 2026-06-17 --feed webull --webull-max-expiries 6
 ```
 
+**Import live holdings** straight from your Webull account into `positions.json`
+(read-only — it never places orders):
+
+```bash
+python3 -m portfolio_monitor --import-positions              # -> positions.json, then exit
+python3 -m portfolio_monitor --import-positions book.json    # custom path
+python3 -m portfolio_monitor --feed webull                   # then run the monitor on it
+```
+
+Stock and option lots are both mapped: cost basis becomes `entry_price`
+(per-share premium for options), and option terms come from Webull's explicit
+fields or, failing that, from parsing the OCC symbol
+(`AAPL  260918C00190000`). Closed/zero-quantity lines are dropped, and the
+written file reloads through the normal loader, so you can hand-edit
+targets/stops afterward.
+
 > ⚠️ The `webull` package is **unofficial / reverse-engineered**: it logs in
 > with your email + password (plus MFA / trade PIN), can break without notice,
 > and using it may conflict with Webull's Terms of Service. `WebullProvider` is

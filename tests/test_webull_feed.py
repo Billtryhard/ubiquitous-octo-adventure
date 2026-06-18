@@ -4,9 +4,15 @@ mark logic, and end-to-end valuation through run_monitor."""
 
 from datetime import date
 
-from portfolio_monitor.models import Position
+from portfolio_monitor.models import OPTION, SHARES, Position
+from portfolio_monitor.positions import load_positions
 from portfolio_monitor.runner import run_monitor
-from portfolio_monitor.webull_feed import WebullProvider
+from portfolio_monitor.webull_feed import (
+    WebullProvider,
+    parse_occ_symbol,
+    position_from_webull,
+    positions_to_json,
+)
 
 
 class FakeWebull:
@@ -17,6 +23,34 @@ class FakeWebull:
 
     def get_options_expiration_dates(self, stock=None, count=-1):
         return [{"date": "2026-09-18", "days": 93}, {"date": "2026-12-18", "days": 184}]
+
+    def get_positions(self):
+        return [
+            # stock lot
+            {
+                "ticker": {"symbol": "AAPL", "type": 2},
+                "position": "200",
+                "costPrice": "175.40",
+            },
+            # option lot with explicit fields
+            {
+                "assetType": "option",
+                "ticker": {"symbol": "AAPL  260918C00190000", "unSymbol": "AAPL"},
+                "optionType": "call",
+                "strikePrice": "190",
+                "optionExpireDate": "2026-09-18",
+                "position": "5",
+                "costPrice": "8.50",
+            },
+            # option lot relying on OCC-symbol parsing + total cost
+            {
+                "ticker": {"symbol": "TSLA  261218P00250000"},
+                "position": "2",
+                "cost": "1700",   # total dollars -> 1700 / (2 * 100) = 8.50/share
+            },
+            # closed line -> skipped
+            {"ticker": {"symbol": "NVDA"}, "position": "0", "costPrice": "100"},
+        ]
 
     def get_options(self, stock=None, expireDate=None, **kwargs):
         # Two strikes per expiry, each with call+put legs.
@@ -80,6 +114,47 @@ def test_max_expiries_caps_calls():
     prov = WebullProvider(FakeWebull(), max_expiries=1)
     chain = prov.get_chain("AAPL", date(2026, 6, 17))
     assert {q.expiry for q in chain.quotes} == {date(2026, 9, 18)}
+
+
+def test_parse_occ_symbol():
+    assert parse_occ_symbol("AAPL  260918C00190000") == ("AAPL", "call", 190.0, date(2026, 9, 18))
+    assert parse_occ_symbol("TSLA261218P00250000") == ("TSLA", "put", 250.0, date(2026, 12, 18))
+    assert parse_occ_symbol("AAPL") is None      # plain equity
+    assert parse_occ_symbol("") is None
+
+
+def test_position_from_webull_variants():
+    # stock
+    stock = position_from_webull({"ticker": {"symbol": "AAPL"}, "position": "200", "costPrice": "175.40"})
+    assert stock.asset_type == SHARES and stock.ticker == "AAPL"
+    assert stock.contracts == 200 and stock.entry_price == 175.40
+
+    # option via OCC symbol + total cost (no explicit fields)
+    opt = position_from_webull({"ticker": {"symbol": "TSLA  261218P00250000"}, "position": "2", "cost": "1700"})
+    assert opt.asset_type == OPTION and opt.ticker == "TSLA"
+    assert opt.option_type == "put" and opt.strike == 250.0
+    assert opt.expiry == date(2026, 12, 18)
+    assert opt.entry_price == 8.50           # 1700 / (2 * 100)
+    assert opt.id == "TSLA_2026-12-18_250P"
+
+    # zero-quantity line is dropped
+    assert position_from_webull({"ticker": {"symbol": "NVDA"}, "position": "0"}) is None
+
+
+def test_fetch_positions_and_roundtrip(tmp_path):
+    prov = WebullProvider(FakeWebull())
+    positions = prov.fetch_positions()
+    ids = {p.id for p in positions}
+    assert ids == {"AAPL_shares", "AAPL_2026-09-18_190C", "TSLA_2026-12-18_250P"}
+
+    # The serialized file reloads through the normal loader unchanged.
+    path = tmp_path / "positions.json"
+    path.write_text(positions_to_json(positions))
+    reloaded = load_positions(str(path))
+    assert {p.id for p in reloaded} == ids
+    aapl_opt = next(p for p in reloaded if p.id == "AAPL_2026-09-18_190C")
+    assert aapl_opt.option_type == "call" and aapl_opt.strike == 190.0
+    assert aapl_opt.contracts == 5 and aapl_opt.entry_price == 8.50
 
 
 def test_end_to_end_valuation_through_webull(tmp_path):

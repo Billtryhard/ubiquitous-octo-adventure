@@ -17,11 +17,13 @@ this module never requires the package to be installed.
 
 from __future__ import annotations
 
+import json
 import os
+import re
 from datetime import date, datetime
 from typing import List, Optional, Sequence, Tuple
 
-from .models import Chain, OptionQuote
+from .models import OPTION, SHARES, Chain, OptionQuote, Position
 from .providers import FinanceProvider
 
 
@@ -48,6 +50,29 @@ def _f(value) -> Optional[float]:
 def _i(value) -> Optional[int]:
     f = _f(value)
     return int(f) if f is not None else None
+
+
+# OCC option symbol, e.g. "AAPL  260918C00190000":
+#   <root><YYMMDD><C|P><strike * 1000, zero-padded to 8>
+_OCC_RE = re.compile(r"^\s*(?P<root>[A-Za-z.\-]+)\s*(?P<ymd>\d{6})(?P<cp>[CP])(?P<strike>\d{8})\s*$")
+
+
+def parse_occ_symbol(symbol: str):
+    """Parse an OCC option symbol into (underlying, option_type, strike, expiry).
+
+    Returns ``None`` if the string is not an OCC option symbol (e.g. plain
+    equity tickers like ``"AAPL"``).
+    """
+    if not symbol:
+        return None
+    m = _OCC_RE.match(symbol)
+    if not m:
+        return None
+    ymd = m.group("ymd")
+    expiry = date(2000 + int(ymd[0:2]), int(ymd[2:4]), int(ymd[4:6]))
+    option_type = "call" if m.group("cp") == "C" else "put"
+    strike = int(m.group("strike")) / 1000.0
+    return m.group("root").upper(), option_type, strike, expiry
 
 
 def _first_price(leg: dict, key: str) -> Optional[float]:
@@ -187,3 +212,153 @@ class WebullProvider(FinanceProvider):
             pulled_at=datetime.now(),
             quotes=quotes,
         )
+
+    # -- live positions -----------------------------------------------------
+
+    def fetch_positions(self) -> List[Position]:
+        """Import the account's current holdings as :class:`Position` rows.
+
+        Read-only: this reads positions, it does not place or modify orders.
+        Cost basis maps to ``entry_price`` (per-share premium for options, per
+        share for stock) so unrealized P/L lines up with how you entered.
+        """
+        raw = _account_positions(self.client)
+        out: List[Position] = []
+        for item in raw:
+            pos = position_from_webull(item)
+            if pos is not None:
+                out.append(pos)
+        return out
+
+
+def _account_positions(client) -> List[dict]:
+    """Pull the raw position rows from whichever client method exists.
+
+    The unofficial package has shifted between ``get_positions()`` and
+    ``get_account()['positions']`` across versions, so try both.
+    """
+    if hasattr(client, "get_positions"):
+        rows = client.get_positions()
+        if rows:
+            return list(rows)
+    if hasattr(client, "get_account"):
+        acct = client.get_account() or {}
+        return list(acct.get("positions", []))
+    return []
+
+
+def position_from_webull(raw: dict) -> Optional[Position]:
+    """Map one raw Webull position dict into a :class:`Position`.
+
+    Tolerant of the unofficial response shape: option terms come from explicit
+    fields when present, otherwise from parsing the OCC symbol.
+    """
+    ticker_info = raw.get("ticker") or {}
+    symbol = (
+        ticker_info.get("symbol")
+        or ticker_info.get("disSymbol")
+        or raw.get("symbol")
+        or ""
+    )
+
+    qty = _f(raw.get("position")) or _f(raw.get("quantity"))
+    if not qty:
+        return None  # closed / zero-quantity line
+
+    # Decide option vs. stock. Prefer explicit signals, fall back to OCC parse.
+    asset_type = str(raw.get("assetType") or ticker_info.get("type") or "").lower()
+    explicit_opt = any(
+        raw.get(k) is not None or ticker_info.get(k) is not None
+        for k in ("optionType", "strikePrice", "optionExpireDate", "expireDate", "direction")
+    )
+    occ = parse_occ_symbol(symbol)
+    is_option = (asset_type == "option") or explicit_opt or occ is not None
+
+    if is_option:
+        option_type = (
+            raw.get("optionType")
+            or ticker_info.get("optionType")
+            or raw.get("direction")
+            or ticker_info.get("direction")
+        )
+        strike = _f(raw.get("strikePrice") or ticker_info.get("strikePrice"))
+        expiry_str = (
+            raw.get("optionExpireDate")
+            or raw.get("expireDate")
+            or ticker_info.get("expireDate")
+        )
+        underlying = (
+            raw.get("unSymbol") or ticker_info.get("unSymbol")
+        )
+        expiry = None
+        if expiry_str:
+            try:
+                expiry = date.fromisoformat(str(expiry_str)[:10])
+            except ValueError:
+                expiry = None
+        # Fill any gaps from the OCC symbol.
+        if occ is not None:
+            occ_root, occ_type, occ_strike, occ_expiry = occ
+            underlying = underlying or occ_root
+            option_type = option_type or occ_type
+            strike = strike if strike is not None else occ_strike
+            expiry = expiry or occ_expiry
+        if option_type:
+            option_type = str(option_type).lower()
+            if option_type in ("c", "long", "buy"):
+                option_type = "call"
+            elif option_type in ("p", "short", "sell"):
+                option_type = "put"
+        if not (underlying and option_type and strike is not None and expiry):
+            return None  # not enough to value it — skip rather than guess
+
+        cost_price = _option_cost_per_share(raw, qty)
+        return Position(
+            asset_type=OPTION,
+            ticker=underlying,
+            option_type=option_type,
+            strike=strike,
+            expiry=expiry,
+            entry_price=cost_price if cost_price is not None else 0.0,
+            contracts=qty,
+        )
+
+    # Stock / ETF lot.
+    if not symbol:
+        return None
+    cost_price = _f(raw.get("costPrice"))
+    if cost_price is None:
+        total = _f(raw.get("cost"))
+        if total is not None and qty:
+            cost_price = total / qty
+    return Position(
+        asset_type=SHARES,
+        ticker=symbol,
+        entry_price=cost_price if cost_price is not None else 0.0,
+        contracts=qty,
+    )
+
+
+def _option_cost_per_share(raw: dict, qty: float) -> Optional[float]:
+    """Per-share premium for an option lot (our entry_price convention)."""
+    cost_price = _f(raw.get("costPrice"))
+    if cost_price is not None:
+        return cost_price
+    total = _f(raw.get("cost"))
+    if total is not None and qty:
+        # Webull totals are dollars; each contract is 100 shares.
+        return total / (qty * 100.0)
+    return None
+
+
+def positions_to_json(positions: Sequence[Position]) -> str:
+    """Serialize positions into the ``{"positions": [...]}`` file format that
+    :func:`portfolio_monitor.positions.load_positions` reads back."""
+    rows = [p.to_record() for p in positions]
+    return json.dumps({"positions": rows}, indent=2)
+
+
+def write_positions_file(positions: Sequence[Position], path: str) -> None:
+    with open(path, "w") as fh:
+        fh.write(positions_to_json(positions))
+        fh.write("\n")

@@ -49,6 +49,10 @@ def build_parser() -> argparse.ArgumentParser:
                    help="cap expirations pulled per underlying from Webull (default: all)")
     p.add_argument("--feed-fallback", action="store_true",
                    help="fall back to the synthetic feed if the live feed can't connect")
+    p.add_argument("--import-positions", nargs="?", const="positions.json", default=None,
+                   metavar="PATH",
+                   help="import live holdings from Webull into PATH (default positions.json) "
+                        "and exit; does not run the monitor")
 
     # Analytics (Layer 2)
     p.add_argument("--no-analytics", action="store_true", help="skip the analytics summary")
@@ -110,8 +114,31 @@ def _build_feed(args):
     raise SystemExit(f"unknown feed {args.feed!r}")
 
 
+def _import_positions(args) -> int:
+    """Pull live holdings from Webull, write the positions file, and exit."""
+    from .webull_feed import WebullProvider, write_positions_file
+    try:
+        provider = WebullProvider.from_env(max_expiries=args.webull_max_expiries)
+    except Exception as exc:
+        raise SystemExit(
+            f"position import needs the Webull feed: {exc}\n"
+            f"Set WEBULL_EMAIL / WEBULL_PASSWORD (and WEBULL_MFA / WEBULL_TRADE_PIN if required)."
+        )
+    positions = provider.fetch_positions()
+    if not positions:
+        print("No open positions returned by Webull — nothing written.", file=sys.stderr)
+        return 1
+    write_positions_file(positions, args.import_positions)
+    print(f"Imported {len(positions)} position(s) from Webull -> {args.import_positions}")
+    for p in positions:
+        print(f"  {p.id}  x{p.contracts:g} @ {p.entry_price:g}")
+    return 0
+
+
 def main(argv=None) -> int:
     args = build_parser().parse_args(argv)
+    if args.import_positions is not None:
+        return _import_positions(args)
     provider = _build_feed(args)
     positions = load_positions(args.positions)
 
