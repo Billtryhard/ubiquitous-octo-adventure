@@ -1,0 +1,19 @@
+{
+  "name": "litigation-legal-marketplace",
+  "owner": {
+    "name": "billtryhard"
+  },
+  "metadata": {
+    "description": "A single-plugin marketplace for the litigation-legal Claude Code plugin.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "litigation-legal",
+      "source": "./plugins/litigation-legal",
+      "description": "Litigation and legal-research workflows powered by legal MCP servers (CourtListener, Descrybe, Trellis, Courtroom5, Legal Data Hunter): grounded case-law research, citation/quote verification, docket monitoring, judge analytics, and deadline calculation. Every legal claim is tied to a verifiable primary source; output is research support, not legal advice.",
+      "category": "research",
+      "keywords": ["legal", "litigation", "case-law", "courtlistener", "citations", "dockets"]
+    }
+  ]
+}
