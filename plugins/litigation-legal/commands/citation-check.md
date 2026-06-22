@@ -3,6 +3,11 @@ description: Cite-check a brief or memo — verify every citation exists, quotes
 argument-hint: <file path to the document, or paste the text>
 ---
 
+**Required MCP servers:** Descrybe Legal Engine and/or CourtListener (Trellis
+for state-court orders). Without at least one, you cannot verify authorities —
+report citations as UNVERIFIED rather than guessing, and tell the user which
+server to connect.
+
 Cite-check the document below (a file path or pasted text):
 
 **$ARGUMENTS**

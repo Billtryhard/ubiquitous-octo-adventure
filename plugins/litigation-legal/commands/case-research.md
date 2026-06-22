@@ -3,6 +3,11 @@ description: Research U.S. case law / statutes on an issue and return a memo wit
 argument-hint: <legal issue, question, or fact pattern> [jurisdiction] [posture]
 ---
 
+**Required MCP servers:** Descrybe Legal Engine and/or CourtListener (Trellis
+for state law; Legal Data Hunter for non-U.S. / multi-jurisdictional). If none
+of these is connected, say so and stop — do not answer case-law questions from
+memory.
+
 Research the following legal issue and produce a grounded research memo:
 
 **$ARGUMENTS**

@@ -3,6 +3,10 @@ description: Build an analytics profile of a judge — ruling tendencies, timing
 argument-hint: <judge name> [court] [motion type or issue]
 ---
 
+**Required MCP servers:** Trellis (judge analytics) and/or CourtListener
+(judges data). If neither is connected, say so and stop — do not estimate a
+judge's tendencies from memory.
+
 Build an analytics profile of the judge:
 
 **$ARGUMENTS**

@@ -3,6 +3,9 @@ description: Find a federal or state docket, summarize it, and offer to set up n
 argument-hint: <case name, docket number, party, or court>
 ---
 
+**Required MCP servers:** CourtListener (federal dockets / RECAP and alerts)
+and/or Trellis (state courts). If neither is connected, say so and stop.
+
 Locate and brief the litigation matter described by:
 
 **$ARGUMENTS**

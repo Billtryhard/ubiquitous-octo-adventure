@@ -3,6 +3,9 @@ description: Calculate litigation deadlines from a triggering event using the Co
 argument-hint: <triggering event and date, court/jurisdiction, and rule set if known>
 ---
 
+**Required MCP server:** Courtroom5 (`deadline_calculator`). If it is not
+connected, say so and stop rather than computing deadlines by hand.
+
 Calculate the litigation deadlines for:
 
 **$ARGUMENTS**
