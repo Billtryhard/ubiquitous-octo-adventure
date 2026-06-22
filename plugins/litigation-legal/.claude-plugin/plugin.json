@@ -1,0 +1,23 @@
+{
+  "name": "litigation-legal",
+  "displayName": "Litigation & Legal Research",
+  "description": "Grounded litigation and legal-research workflows over the available legal MCP servers (CourtListener, Descrybe, Trellis, Courtroom5, Legal Data Hunter): case-law research with verified citations, citation/quote checking, docket monitoring, judge analytics, and litigation deadline calculation. Research support only — not legal advice.",
+  "version": "0.1.0",
+  "author": {
+    "name": "billtryhard"
+  },
+  "homepage": "https://github.com/billtryhard/ubiquitous-octo-adventure",
+  "repository": "https://github.com/billtryhard/ubiquitous-octo-adventure",
+  "license": "MIT",
+  "keywords": [
+    "legal",
+    "litigation",
+    "case-law",
+    "courtlistener",
+    "descrybe",
+    "trellis",
+    "citations",
+    "dockets",
+    "judge-analytics"
+  ]
+}
