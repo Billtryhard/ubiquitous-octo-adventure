@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AB Rentals — Quality Rentals Made Easy</title>
+  <meta name="description" content="AB Rentals offers reliable, affordable rentals with fast service and friendly support. Request a free quote today." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- ===== Header / Nav ===== -->
+  <header class="site-header" id="top">
+    <div class="container header-inner">
+      <a href="#top" class="brand">
+        <span class="brand-mark">AB</span>
+        <span class="brand-name">AB Rentals</span>
+      </a>
+      <nav class="nav" id="nav">
+        <a href="#services">Services</a>
+        <a href="#why">Why Us</a>
+        <a href="#gallery">Gallery</a>
+        <a href="#reviews">Reviews</a>
+        <a href="#contact">Contact</a>
+        <a href="#contact" class="btn btn-sm btn-primary nav-cta">Get a Quote</a>
+      </nav>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== Hero ===== -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow">Trusted local rentals</p>
+        <h1>Quality Rentals,<br /><span class="accent">Made Simple.</span></h1>
+        <p class="lead">
+          AB Rentals makes it easy to get exactly what you need — fast booking,
+          fair pricing, and friendly service every step of the way.
+        </p>
+        <div class="hero-actions">
+          <a href="#contact" class="btn btn-primary btn-lg">Request a Free Quote</a>
+          <a href="tel:+10000000000" class="btn btn-ghost btn-lg">Call [Your Phone]</a>
+        </div>
+        <ul class="hero-badges">
+          <li>✓ Fast turnaround</li>
+          <li>✓ Affordable rates</li>
+          <li>✓ Locally owned</li>
+        </ul>
+      </div>
+
+      <!-- Quick lead form in hero -->
+      <div class="hero-form-card">
+        <h3>Get a Fast Quote</h3>
+        <p class="muted">Fill this out and we'll reach out shortly.</p>
+        <form class="lead-form" data-form="hero" novalidate>
+          <input type="text" name="name" placeholder="Your name" required />
+          <input type="tel" name="phone" placeholder="Phone number" required />
+          <input type="email" name="email" placeholder="Email address" />
+          <select name="interest" required>
+            <option value="" disabled selected>What are you renting?</option>
+            <option>Not sure yet</option>
+            <option>Short-term rental</option>
+            <option>Long-term rental</option>
+            <option>Other</option>
+          </select>
+          <button type="submit" class="btn btn-primary btn-block">Get My Quote</button>
+          <p class="form-status" aria-live="polite"></p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Stats bar ===== -->
+  <section class="stats">
+    <div class="container stats-grid">
+      <div class="stat"><span class="stat-num">10+</span><span class="stat-label">Years Serving Locally</span></div>
+      <div class="stat"><span class="stat-num">1,000+</span><span class="stat-label">Happy Customers</span></div>
+      <div class="stat"><span class="stat-num">24/7</span><span class="stat-label">Support Available</span></div>
+      <div class="stat"><span class="stat-num">5★</span><span class="stat-label">Average Rating</span></div>
+    </div>
+  </section>
+
+  <!-- ===== Services ===== -->
+  <section class="section" id="services">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow center">What We Offer</p>
+        <h2>Rentals built around your needs</h2>
+        <p class="section-sub">From quick one-time rentals to ongoing arrangements, AB Rentals has you covered.</p>
+      </div>
+      <div class="cards-grid">
+        <article class="card">
+          <div class="card-icon">🏠</div>
+          <h3>Flexible Options</h3>
+          <p>Short-term and long-term rentals tailored to your schedule and budget.</p>
+        </article>
+        <article class="card">
+          <div class="card-icon">💲</div>
+          <h3>Transparent Pricing</h3>
+          <p>No hidden fees. You'll always know exactly what you're paying upfront.</p>
+        </article>
+        <article class="card">
+          <div class="card-icon">⚡</div>
+          <h3>Fast & Reliable</h3>
+          <p>Quick responses and dependable service so you're never left waiting.</p>
+        </article>
+        <article class="card">
+          <div class="card-icon">🤝</div>
+          <h3>Personal Service</h3>
+          <p>A locally owned team that actually answers the phone and cares about you.</p>
+        </article>
+        <article class="card">
+          <div class="card-icon">🛡️</div>
+          <h3>Quality You Can Trust</h3>
+          <p>Well-maintained, ready-to-go rentals that meet our high standards.</p>
+        </article>
+        <article class="card">
+          <div class="card-icon">📞</div>
+          <h3>Easy Booking</h3>
+          <p>Reserve in minutes by phone or online — no complicated paperwork.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Why Us ===== -->
+  <section class="section section-alt" id="why">
+    <div class="container why-inner">
+      <div class="why-media">
+        <img src="assets/about.svg" alt="AB Rentals team" />
+      </div>
+      <div class="why-copy">
+        <p class="eyebrow">Why AB Rentals</p>
+        <h2>Your reliable rental partner</h2>
+        <p>
+          We started AB Rentals with one goal: make renting simple, honest, and
+          stress-free. We treat every customer like a neighbor, because that's
+          exactly who you are.
+        </p>
+        <ul class="check-list">
+          <li>Locally owned and operated</li>
+          <li>Clear, upfront pricing — no surprises</li>
+          <li>Friendly support whenever you need it</li>
+          <li>Flexible terms that fit your life</li>
+        </ul>
+        <a href="#contact" class="btn btn-primary">Talk to Us Today</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Gallery ===== -->
+  <section class="section" id="gallery">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow center">Gallery</p>
+        <h2>Take a look</h2>
+        <p class="section-sub">Replace these with photos of your actual rentals.</p>
+      </div>
+      <div class="gallery-grid">
+        <div class="gallery-item" style="--i:1">Photo 1</div>
+        <div class="gallery-item" style="--i:2">Photo 2</div>
+        <div class="gallery-item" style="--i:3">Photo 3</div>
+        <div class="gallery-item" style="--i:4">Photo 4</div>
+        <div class="gallery-item" style="--i:5">Photo 5</div>
+        <div class="gallery-item" style="--i:6">Photo 6</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Reviews ===== -->
+  <section class="section section-alt" id="reviews">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow center">Reviews</p>
+        <h2>What customers say</h2>
+      </div>
+      <div class="reviews-grid">
+        <blockquote class="review">
+          <div class="stars">★★★★★</div>
+          <p>"Super easy to work with and great prices. AB Rentals made the whole process painless."</p>
+          <footer>— Jamie R.</footer>
+        </blockquote>
+        <blockquote class="review">
+          <div class="stars">★★★★★</div>
+          <p>"Fast, friendly, and reliable. I won't rent from anyone else now."</p>
+          <footer>— Marcus T.</footer>
+        </blockquote>
+        <blockquote class="review">
+          <div class="stars">★★★★★</div>
+          <p>"They answered all my questions and got me set up the same day. Highly recommend!"</p>
+          <footer>— Dana L.</footer>
+        </blockquote>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Contact / CTA ===== -->
+  <section class="section contact" id="contact">
+    <div class="container contact-inner">
+      <div class="contact-copy">
+        <p class="eyebrow">Get In Touch</p>
+        <h2>Ready to get started?</h2>
+        <p>Send us a message or give us a call. We'll get back to you quickly with everything you need.</p>
+        <ul class="contact-details">
+          <li><span class="ci">📞</span> <a href="tel:+10000000000">[Your Phone]</a></li>
+          <li><span class="ci">✉️</span> <a href="mailto:hello@abrentals.com">[Your Email]</a></li>
+          <li><span class="ci">📍</span> [Your Address / Service Area]</li>
+          <li><span class="ci">🕒</span> Mon–Sat, 8am–6pm</li>
+        </ul>
+      </div>
+      <div class="contact-form-card">
+        <h3>Request a Quote</h3>
+        <form class="lead-form" data-form="contact" novalidate>
+          <input type="text" name="name" placeholder="Full name" required />
+          <div class="form-row">
+            <input type="tel" name="phone" placeholder="Phone" required />
+            <input type="email" name="email" placeholder="Email" />
+          </div>
+          <textarea name="message" rows="4" placeholder="Tell us what you're looking for..."></textarea>
+          <button type="submit" class="btn btn-primary btn-block btn-lg">Send Request</button>
+          <p class="form-status" aria-live="polite"></p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Footer ===== -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="brand">
+        <span class="brand-mark">AB</span>
+        <span class="brand-name">AB Rentals</span>
+      </div>
+      <p class="footer-tag">Quality rentals, made simple.</p>
+      <nav class="footer-nav">
+        <a href="#services">Services</a>
+        <a href="#why">Why Us</a>
+        <a href="#gallery">Gallery</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <p class="copyright">© <span id="year"></span> AB Rentals. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <a href="#contact" class="floating-cta">Get a Quote</a>
+
+  <script src="script.js"></script>
+</body>
+</html>
