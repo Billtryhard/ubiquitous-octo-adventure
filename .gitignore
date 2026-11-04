@@ -6,3 +6,5 @@ __pycache__/
 snapshots/*.json
 .venv/
 venv/
+# trader-skill working data (portfolio, orders, SEC user agent)
+trader/
