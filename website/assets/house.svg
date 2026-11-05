@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 460" role="img" aria-label="House bought for cash">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e6f6ec"/>
+      <stop offset="1" stop-color="#f6f8fb"/>
+    </linearGradient>
+    <linearGradient id="roof" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1f9d55"/>
+      <stop offset="1" stop-color="#178046"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="460" fill="url(#sky)"/>
+  <circle cx="500" cy="86" r="42" fill="#f6b73c" opacity="0.9"/>
+  <!-- ground -->
+  <rect x="0" y="372" width="600" height="88" fill="#d9e6dd"/>
+  <!-- lawn path -->
+  <polygon points="270,460 330,460 360,392 240,392" fill="#cdddd1"/>
+  <!-- house body -->
+  <rect x="150" y="196" width="300" height="190" rx="8" fill="#ffffff" stroke="#e6eaf0"/>
+  <!-- roof -->
+  <polygon points="134,200 300,96 466,200" fill="url(#roof)"/>
+  <!-- chimney -->
+  <rect x="396" y="128" width="28" height="48" fill="#178046"/>
+  <!-- door -->
+  <rect x="276" y="300" width="56" height="86" rx="5" fill="#1f9d55"/>
+  <circle cx="322" cy="344" r="4" fill="#f6b73c"/>
+  <!-- windows -->
+  <rect x="186" y="238" width="60" height="58" rx="5" fill="#e6f6ec" stroke="#1f9d55" stroke-width="2"/>
+  <line x1="216" y1="238" x2="216" y2="296" stroke="#1f9d55" stroke-width="2"/>
+  <line x1="186" y1="267" x2="246" y2="267" stroke="#1f9d55" stroke-width="2"/>
+  <rect x="354" y="238" width="60" height="58" rx="5" fill="#e6f6ec" stroke="#1f9d55" stroke-width="2"/>
+  <line x1="384" y1="238" x2="384" y2="296" stroke="#1f9d55" stroke-width="2"/>
+  <line x1="354" y1="267" x2="414" y2="267" stroke="#1f9d55" stroke-width="2"/>
+  <!-- SOLD sign -->
+  <g transform="translate(70,300)">
+    <rect x="18" y="0" width="6" height="86" fill="#9aa7b2"/>
+    <rect x="-8" y="-44" width="76" height="52" rx="6" fill="#12263a"/>
+    <text x="30" y="-12" text-anchor="middle" font-family="Poppins, Arial, sans-serif" font-size="24" font-weight="800" fill="#ffffff">SOLD</text>
+  </g>
+  <!-- cash badge -->
+  <g transform="translate(470,330)">
+    <circle cx="0" cy="0" r="40" fill="#f6b73c"/>
+    <text x="0" y="12" text-anchor="middle" font-family="Poppins, Arial, sans-serif" font-size="36" font-weight="800" fill="#12263a">$</text>
+  </g>
+</svg>
