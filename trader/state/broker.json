@@ -1,0 +1,129 @@
+{
+  "orders": [
+    {
+      "at": "2026-11-05T18:16:05",
+      "date": "2026-11-05",
+      "index": 1,
+      "fingerprint": "e61ee11f2d6a7797",
+      "symbol": "AAPL",
+      "side": "buy",
+      "plain": "BUY $250 of AAPL, market order, good for today",
+      "status": "approved",
+      "reply": "yes",
+      "paper": true,
+      "broker": "alpaca"
+    },
+    {
+      "at": "2026-11-05T18:16:10",
+      "date": "2026-11-05",
+      "index": 1,
+      "fingerprint": "e61ee11f2d6a7797",
+      "symbol": "AAPL",
+      "side": "buy",
+      "plain": "BUY $250 of AAPL, market order, good for today",
+      "status": "placed",
+      "broker_order_id": "SIM-1",
+      "note": "simulated paper fill at live quote"
+    },
+    {
+      "at": "2026-11-05T18:16:58",
+      "date": "2026-11-05",
+      "index": 2,
+      "fingerprint": "7192c1d132f5d151",
+      "symbol": "AXP",
+      "side": "buy",
+      "plain": "BUY $223 of AXP, market order, good for today",
+      "status": "approved",
+      "reply": "yes",
+      "paper": true,
+      "broker": "alpaca"
+    },
+    {
+      "at": "2026-11-05T18:16:59",
+      "date": "2026-11-05",
+      "index": 2,
+      "fingerprint": "7192c1d132f5d151",
+      "symbol": "AXP",
+      "side": "buy",
+      "plain": "BUY $223 of AXP, market order, good for today",
+      "status": "placed",
+      "broker_order_id": "SIM-2",
+      "note": "simulated paper fill at live quote"
+    },
+    {
+      "at": "2026-11-05T18:18:52",
+      "date": "2026-11-05",
+      "index": 3,
+      "fingerprint": "cab5e52629ce264e",
+      "symbol": "GOOGL",
+      "side": "buy",
+      "plain": "BUY $165 of GOOGL, market order, good for today",
+      "status": "approved",
+      "reply": "yes",
+      "paper": true,
+      "broker": "alpaca"
+    },
+    {
+      "at": "2026-11-05T18:18:53",
+      "date": "2026-11-05",
+      "index": 3,
+      "fingerprint": "cab5e52629ce264e",
+      "symbol": "GOOGL",
+      "side": "buy",
+      "plain": "BUY $165 of GOOGL, market order, good for today",
+      "status": "placed",
+      "broker_order_id": "SIM-3",
+      "note": "simulated paper fill at live quote"
+    },
+    {
+      "at": "2026-11-05T18:20:57",
+      "date": "2026-11-05",
+      "index": 4,
+      "fingerprint": "01c049c9879e588e",
+      "symbol": "KO",
+      "side": "buy",
+      "plain": "BUY $142 of KO, market order, good for today",
+      "status": "approved",
+      "reply": "yes",
+      "paper": true,
+      "broker": "alpaca"
+    },
+    {
+      "at": "2026-11-05T18:20:58",
+      "date": "2026-11-05",
+      "index": 4,
+      "fingerprint": "01c049c9879e588e",
+      "symbol": "KO",
+      "side": "buy",
+      "plain": "BUY $142 of KO, market order, good for today",
+      "status": "placed",
+      "broker_order_id": "SIM-4",
+      "note": "simulated paper fill at live quote"
+    },
+    {
+      "at": "2026-11-05T18:23:10",
+      "date": "2026-11-05",
+      "index": 5,
+      "fingerprint": "b5dc690c2c8a2fbc",
+      "symbol": "BAC",
+      "side": "buy",
+      "plain": "BUY $120 of BAC, market order, good for today",
+      "status": "approved",
+      "reply": "yes",
+      "paper": true,
+      "broker": "alpaca"
+    },
+    {
+      "at": "2026-11-05T18:23:11",
+      "date": "2026-11-05",
+      "index": 5,
+      "fingerprint": "b5dc690c2c8a2fbc",
+      "symbol": "BAC",
+      "side": "buy",
+      "plain": "BUY $120 of BAC, market order, good for today",
+      "status": "placed",
+      "broker_order_id": "SIM-5",
+      "note": "simulated paper fill at live quote"
+    }
+  ]
+}

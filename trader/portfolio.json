@@ -1,0 +1,65 @@
+{
+  "cash": 100.0,
+  "positions": [
+    {
+      "ticker": "AAPL",
+      "shares": 0.72666,
+      "lots": [
+        {
+          "id": "AAPL-1",
+          "date": "2026-11-05",
+          "shares": 0.72666,
+          "cost": 250.0
+        }
+      ]
+    },
+    {
+      "ticker": "AXP",
+      "shares": 0.680791,
+      "lots": [
+        {
+          "id": "AXP-1",
+          "date": "2026-11-05",
+          "shares": 0.680791,
+          "cost": 223.0
+        }
+      ]
+    },
+    {
+      "ticker": "GOOGL",
+      "shares": 0.582854,
+      "lots": [
+        {
+          "id": "GOOGL-1",
+          "date": "2026-11-05",
+          "shares": 0.582854,
+          "cost": 165.0
+        }
+      ]
+    },
+    {
+      "ticker": "KO",
+      "shares": 1.482409,
+      "lots": [
+        {
+          "id": "KO-1",
+          "date": "2026-11-05",
+          "shares": 1.482409,
+          "cost": 142.0
+        }
+      ]
+    },
+    {
+      "ticker": "BAC",
+      "shares": 2.396166,
+      "lots": [
+        {
+          "id": "BAC-1",
+          "date": "2026-11-05",
+          "shares": 2.396166,
+          "cost": 120.0
+        }
+      ]
+    }
+  ]
+}
