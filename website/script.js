@@ -37,7 +37,7 @@ document.querySelectorAll('.lead-form').forEach((form) => {
     }
 
     // Simulated success (replace with real submission — see README.md)
-    setStatus(status, 'Thanks! We received your request and will be in touch soon.', 'ok');
+    setStatus(status, "Thanks! We received your info and will reach out shortly with your cash offer.", 'ok');
     form.reset();
   });
 });
@@ -49,8 +49,18 @@ function setStatus(el, msg, type) {
 }
 
 // ===== Reveal-on-scroll animation =====
-const revealEls = document.querySelectorAll('.card, .review, .gallery-item, .stat');
-if ('IntersectionObserver' in window) {
+// Content is visible by default (in CSS/HTML). We only *animate* it in when
+// JS + IntersectionObserver are available, and a safety timer guarantees
+// everything becomes visible regardless — so a section never stays blank.
+const revealEls = document.querySelectorAll('.card, .review, .step, .stat, .compare-col');
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function show(el) {
+  el.style.opacity = '1';
+  el.style.transform = 'none';
+}
+
+if ('IntersectionObserver' in window && !reduceMotion) {
   revealEls.forEach((el) => {
     el.style.opacity = '0';
     el.style.transform = 'translateY(16px)';
@@ -60,13 +70,17 @@ if ('IntersectionObserver' in window) {
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          entry.target.style.opacity = '1';
-          entry.target.style.transform = 'none';
+          show(entry.target);
           io.unobserve(entry.target);
         }
       });
     },
-    { threshold: 0.15 }
+    { threshold: 0.12, rootMargin: '0px 0px -5% 0px' }
   );
   revealEls.forEach((el) => io.observe(el));
+
+  // Safety net: never leave anything hidden (e.g. printing, full-page capture,
+  // tabs that never fire the observer).
+  window.addEventListener('load', () => setTimeout(() => revealEls.forEach(show), 1500));
+  window.addEventListener('beforeprint', () => revealEls.forEach(show));
 }
