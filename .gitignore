@@ -10,3 +10,5 @@ venv/
 # portfolio, orders, targets and the broker/risk log are saved
 trader/config.json
 trader/prices.json
+# real-money holdings stay local unless the owner asks to back them up
+trader/real/
