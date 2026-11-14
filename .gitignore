@@ -12,3 +12,6 @@ trader/config.json
 trader/prices.json
 # real-money holdings stay local unless the owner asks to back them up
 trader/real/
+# per-run caches (change on every news/alert check)
+trader/state/news.json
+trader/state/alerts.json
